@@ -38,4 +38,9 @@ docker-build:
 	docker build -t golang-server-boilerplate .
 
 docker-run: docker-build
-	docker run -p 8080:8080 -e PORT=8080 -e LOG_FORMAT=text golang-server-boilerplate
+	docker run --rm -p 8080:8080 \
+		-e PORT=8080 -e LOG_FORMAT=text \
+		-e CHECK_INTERVAL=5m \
+		-e STATE_PATH=/var/lib/watcher/state.json \
+		-v watcher-state:/var/lib/watcher \
+		golang-server-boilerplate

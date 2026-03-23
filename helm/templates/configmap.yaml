@@ -7,3 +7,6 @@ metadata:
 data:
   PORT: {{ .Values.app.port | quote }}
   LOG_FORMAT: {{ .Values.app.logFormat | quote }}
+  CHECK_INTERVAL: {{ .Values.app.checkInterval | quote }}
+  STATE_PATH: {{ .Values.app.statePath | quote }}
+  IP_URLS: {{ .Values.app.ipUrls | quote }}

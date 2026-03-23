@@ -1,0 +1,92 @@
+package watcher
+
+import (
+	"context"
+	"log/slog"
+	"net/http"
+	"sync/atomic"
+	"time"
+
+	"github.com/nwthomas/watcher-in-the-water/internal/ipstate"
+	"github.com/nwthomas/watcher-in-the-water/internal/publicip"
+)
+
+// Config drives the public IP polling loop.
+type Config struct {
+	StatePath    string
+	PollInterval time.Duration
+	IPURLs       []string
+	HTTPClient   *http.Client
+}
+
+// Run polls public IP on an interval until ctx is cancelled. On first successful fetch,
+// ready is set (if non-nil). Logs when the IP changes from a non-empty previous value.
+func Run(ctx context.Context, cfg Config, ready *atomic.Bool) {
+	interval := cfg.PollInterval
+	if interval <= 0 {
+		interval = 5 * time.Minute
+	}
+	client := cfg.HTTPClient
+	if client == nil {
+		client = &http.Client{Timeout: 15 * time.Second}
+	}
+	urls := cfg.IPURLs
+	if len(urls) == 0 {
+		urls = publicip.DefaultURLs
+	}
+
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	pollOnce(ctx, client, urls, cfg.StatePath, ready)
+
+	for {
+		select {
+		case <-ctx.Done():
+			slog.Info("ip watcher stopped")
+			return
+		case <-ticker.C:
+			pollOnce(ctx, client, urls, cfg.StatePath, ready)
+		}
+	}
+}
+
+func pollOnce(ctx context.Context, client *http.Client, urls []string, statePath string, ready *atomic.Bool) {
+	previous, err := ipstate.Load(statePath)
+	if err != nil {
+		slog.Error("load ip state", "path", statePath, "err", err)
+	}
+
+	ip, err := publicip.Fetch(ctx, client, urls)
+	if err != nil {
+		slog.Error("fetch public IP", "err", err)
+		return
+	}
+	if ready != nil {
+		ready.Store(true)
+	}
+
+	if previous.PublicIP == "" {
+		next := ipstate.State{PublicIP: ip, UpdatedAt: time.Now().UTC()}
+		if err := ipstate.Save(statePath, next); err != nil {
+			slog.Error("save initial ip state", "path", statePath, "err", err)
+			return
+		}
+		slog.Info("seeded public ip", "public_ip", ip)
+		return
+	}
+	if previous.PublicIP == ip {
+		return
+	}
+
+	next := ipstate.State{PublicIP: ip, UpdatedAt: time.Now().UTC()}
+	if err := ipstate.Save(statePath, next); err != nil {
+		slog.Error("save ip state after change", "path", statePath, "err", err)
+		return
+	}
+
+	slog.Info("public ip changed",
+		"previous_ip", previous.PublicIP,
+		"current_ip", ip,
+	)
+}

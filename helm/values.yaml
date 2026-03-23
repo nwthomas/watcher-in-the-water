@@ -70,7 +70,8 @@ healthCheck:
   enabled: true
   livenessPath: /health/live
   readinessPath: /health/ready
-  initialDelaySeconds: 10
+  # Allow time for the first outbound public-IP poll before readiness must succeed.
+  initialDelaySeconds: 15
   periodSeconds: 30
   timeoutSeconds: 10
   successThreshold: 1
@@ -79,6 +80,15 @@ healthCheck:
 app:
   port: 8080
   logFormat: json
+  checkInterval: 5m
+  statePath: /var/lib/watcher/state.json
+  ipUrls: ""
+
+persistence:
+  enabled: true
+  mountPath: /var/lib/watcher
+  size: 1Gi
+  storageClassName: ""
 
 # Extra env vars: plain values, or from ConfigMap/Secret via valueFrom
 # extraEnv:

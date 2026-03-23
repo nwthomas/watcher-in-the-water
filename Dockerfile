@@ -14,6 +14,8 @@ RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o server ./cmd/server
 FROM alpine:3.20
 WORKDIR /app
 
+RUN apk add --no-cache ca-certificates wget
+
 RUN adduser -D -u 1000 appuser
 
 COPY --from=builder /app/server .

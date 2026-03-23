@@ -59,6 +59,9 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: state
+              mountPath: {{ .Values.persistence.mountPath | quote }}
           env:
             - name: PORT
               valueFrom:
@@ -70,6 +73,21 @@ spec:
                 configMapKeyRef:
                   name: {{ include "golang-server-boilerplate.configmapName" . }}
                   key: LOG_FORMAT
+            - name: CHECK_INTERVAL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "golang-server-boilerplate.configmapName" . }}
+                  key: CHECK_INTERVAL
+            - name: STATE_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "golang-server-boilerplate.configmapName" . }}
+                  key: STATE_PATH
+            - name: IP_URLS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "golang-server-boilerplate.configmapName" . }}
+                  key: IP_URLS
           {{- range .Values.extraEnv }}
             - name: {{ .name }}
               {{- if .valueFrom }}
@@ -95,3 +113,11 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        - name: state
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "golang-server-boilerplate.fullname" . }}-state
+          {{- else }}
+          emptyDir: {}
+          {{- end }}

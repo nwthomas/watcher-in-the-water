@@ -12,7 +12,7 @@ concurrency:
 
 env:
     REGISTRY: docker.io
-    IMAGE_NAME: deep-learning-research-agent
+    IMAGE_NAME: watcher-in-the-water
     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
     DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
     GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -99,6 +99,7 @@ jobs:
               uses: peter-evans/create-pull-request@v5
               with:
                   token: ${{ secrets.GITHUB_TOKEN }}
+                  base: main
                   commit-message: "feat: update image tag to ${{ steps.sha.outputs.short_sha }}"
                   title: "Update image tag to ${{ steps.sha.outputs.short_sha }} for deployment"
                   # NOTE: Update the if condition for running this entire workflow if the automated PR body changes.

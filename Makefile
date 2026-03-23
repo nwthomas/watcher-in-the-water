@@ -35,6 +35,6 @@ docker-run: docker-build
 	docker run --rm -p 8080:8080 \
 		-e PORT=8080 -e LOG_FORMAT=text \
 		-e CHECK_INTERVAL=5m \
-		-e STATE_PATH=/var/lib/watcher/state.json \
+		-e STATE_PATH=tmp/state.json \
 		-v watcher-state:/var/lib/watcher \
 		watcher-in-the-water

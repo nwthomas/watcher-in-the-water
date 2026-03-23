@@ -1,0 +1,17 @@
+apiVersion: v2
+name: golang-server-boilerplate
+description: Minimal production-ready Go HTTP server
+type: application
+version: 0.0.0-alpha
+appVersion: "0.0.0-alpha"
+keywords:
+  - go
+  - http
+  - server
+  - boilerplate
+home: https://github.com/nwthomas/bedlam/gateway
+sources:
+  - https://github.com/nwthomas/bedlam/gateway
+maintainers:
+  - name: Nathan Thomas
+    email: contact@nathanthomas.dev

@@ -1,0 +1,11 @@
+.git
+.github
+.env
+env/*.env
+bin
+*.md
+.idea
+.vscode
+*.test
+coverage.*
+*.coverprofile

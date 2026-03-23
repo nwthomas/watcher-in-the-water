@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"testing"
+	"time"
 )
 
 func TestGetEnv(t *testing.T) {
@@ -50,6 +51,82 @@ func TestGetEnv(t *testing.T) {
 			got := GetEnv(tt.key, tt.defaultValue)
 			if got != tt.want {
 				t.Fatalf("GetEnv(%q, %q) = %q, want %q", tt.key, tt.defaultValue, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestLoadServerConfig(t *testing.T) {
+	mustParse := func(s string) time.Duration {
+		t.Helper()
+		d, err := time.ParseDuration(s)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return d
+	}
+
+	tests := []struct {
+		name string
+		env  map[string]string
+		want ServerConfig
+	}{
+		{
+			name: "defaults when unset",
+			env:  nil,
+			want: ServerConfig{
+				LogFormat:     DefaultLogFormat,
+				Port:          DefaultServerPort,
+				StatePath:     DefaultStatePath,
+				CheckInterval: mustParse(DefaultCheckInterval),
+				IPURLs:        "",
+			},
+		},
+		{
+			name: "overrides",
+			env: map[string]string{
+				"LOG_FORMAT":     "json",
+				"PORT":           "3000",
+				"STATE_PATH":     "/tmp/x.json",
+				"CHECK_INTERVAL": "10s",
+				"IP_URLS":        "https://example.com",
+			},
+			want: ServerConfig{
+				LogFormat:     "json",
+				Port:          "3000",
+				StatePath:     "/tmp/x.json",
+				CheckInterval: 10 * time.Second,
+				IPURLs:        "https://example.com",
+			},
+		},
+		{
+			name: "invalid check interval falls back to default duration",
+			env: map[string]string{
+				"CHECK_INTERVAL": "not-a-duration",
+			},
+			want: ServerConfig{
+				LogFormat:     DefaultLogFormat,
+				Port:          DefaultServerPort,
+				StatePath:     DefaultStatePath,
+				CheckInterval: mustParse(DefaultCheckInterval),
+				IPURLs:        "",
+			},
+		},
+	}
+
+	keys := []string{"LOG_FORMAT", "PORT", "STATE_PATH", "CHECK_INTERVAL", "IP_URLS"}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, k := range keys {
+				t.Setenv(k, "")
+			}
+			for k, v := range tt.env {
+				t.Setenv(k, v)
+			}
+
+			got := LoadServerConfig()
+			if got != tt.want {
+				t.Fatalf("LoadServerConfig() = %+v, want %+v", got, tt.want)
 			}
 		})
 	}

@@ -28,12 +28,6 @@ lint:
 fmt:
 	go fmt ./...
 
-clean:
-	rm -rf bin/
-
-deps:
-	go mod download
-
 docker-build:
 	docker build -t golang-server-boilerplate .
 

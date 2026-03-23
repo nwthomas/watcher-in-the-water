@@ -29,5 +29,8 @@ go.work.sum
 .envrc
 .venv
 
+# Build files
+bin/
+
 # Miscellaneous
 .DS_Store

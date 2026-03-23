@@ -22,27 +22,12 @@ import (
 )
 
 const (
-	DEFAULT_SERVER_PORT    = "8080"
-	DEFAULT_STATE_PATH     = "/var/lib/watcher/state.json"
-	DEFAULT_CHECK_INTERVAL = "5m"
-
-	IDLE_TIMEOUT_S        = 10 * time.Second
-	READ_HEADER_TIMEOUT_S = 5 * time.Second
-	READ_TIMEOUT_S        = 5 * time.Second
-	SHUTDOWN_TIMEOUT_S    = 30 * time.Second
-	WRITE_TIMEOUT_S       = 5 * time.Second
+	TIMEOUT_IDLE_S        = 10 * time.Second
+	TIMEOUT_READ_HEADER_S = 5 * time.Second
+	TIMEOUT_READ_S        = 5 * time.Second
+	TIMEOUT_SHUTDOWN_S    = 30 * time.Second
+	TIMEOUT_WRITE_S       = 5 * time.Second
 )
-
-func runServer(server *http.Server, port string) {
-	go func() {
-		slog.Info("server starting", "port", port)
-		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
-			slog.Error("HTTP server error", "err", err)
-			os.Exit(1)
-		}
-		slog.Info("stopped serving new connections")
-	}()
-}
 
 func healthLiveHandler(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
@@ -73,28 +58,12 @@ func panicRecovery(next http.Handler) http.Handler {
 	})
 }
 
-func parseDurationEnv(key, defaultVal string) time.Duration {
-	s := config.GetEnv(key, defaultVal)
-	d, err := time.ParseDuration(s)
-	if err != nil {
-		slog.Warn("invalid duration, using default", "key", key, "value", s, "default", defaultVal, "err", err)
-		fallback, err2 := time.ParseDuration(defaultVal)
-		if err2 != nil {
-			return 5 * time.Minute
-		}
-		return fallback
-	}
-	return d
-}
-
 func main() {
-	logger.Init(config.GetEnv("LOG_FORMAT", "text"))
+	cfg := config.LoadServerConfig()
 
-	port := config.GetEnv("PORT", DEFAULT_SERVER_PORT)
-	statePath := config.GetEnv("STATE_PATH", DEFAULT_STATE_PATH)
-	pollInterval := parseDurationEnv("CHECK_INTERVAL", DEFAULT_CHECK_INTERVAL)
+	logger.Init(cfg.LogFormat)
 
-	ipURLs := publicip.ParseURLList(config.GetEnv("IP_URLS", ""))
+	ipURLs := publicip.ParseURLList(cfg.IPURLs)
 
 	var ready atomic.Bool
 
@@ -103,29 +72,36 @@ func main() {
 	mux.HandleFunc("/health/ready", readinessHandler(&ready))
 
 	server := &http.Server{
-		Addr:              ":" + port,
+		Addr:              ":" + cfg.Port,
 		Handler:           panicRecovery(mux),
-		ReadHeaderTimeout: READ_HEADER_TIMEOUT_S,
-		ReadTimeout:       READ_TIMEOUT_S,
-		WriteTimeout:      WRITE_TIMEOUT_S,
-		IdleTimeout:       IDLE_TIMEOUT_S,
+		ReadHeaderTimeout: TIMEOUT_READ_HEADER_S,
+		ReadTimeout:       TIMEOUT_READ_S,
+		WriteTimeout:      TIMEOUT_WRITE_S,
+		IdleTimeout:       TIMEOUT_IDLE_S,
 	}
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	runServer(server, port)
+	go func() {
+		slog.Info("server starting", "port", cfg.Port)
+		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+			slog.Error("HTTP server error", "err", err)
+			os.Exit(1)
+		}
+		slog.Info("shutdown starting")
+	}()
 
 	go watcher.Run(ctx, watcher.Config{
-		StatePath:    statePath,
-		PollInterval: pollInterval,
+		StatePath:    cfg.StatePath,
+		PollInterval: cfg.CheckInterval,
 		IPURLs:       ipURLs,
 	}, &ready)
 
 	<-ctx.Done()
 
 	slog.Info("shutdown signal received")
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), SHUTDOWN_TIMEOUT_S)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), TIMEOUT_SHUTDOWN_S)
 	defer cancel()
 
 	if err := server.Shutdown(shutdownCtx); err != nil {
@@ -134,5 +110,5 @@ func main() {
 			slog.Error("force close failed", "err", closeErr)
 		}
 	}
-	slog.Info("graceful shutdown complete")
+	slog.Info("shutdown complete")
 }

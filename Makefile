@@ -29,7 +29,7 @@ fmt:
 	go fmt ./...
 
 docker-build:
-	docker build -t golang-server-boilerplate .
+	docker build -t watcher-in-the-water .
 
 docker-run: docker-build
 	docker run --rm -p 8080:8080 \
@@ -37,4 +37,4 @@ docker-run: docker-build
 		-e CHECK_INTERVAL=5m \
 		-e STATE_PATH=/var/lib/watcher/state.json \
 		-v watcher-state:/var/lib/watcher \
-		golang-server-boilerplate
+		watcher-in-the-water

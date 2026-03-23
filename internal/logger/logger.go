@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// Init configures the default slog logger for the process.
+// Init configures the default slog logger for the process
 func Init(format string) {
 	var handler slog.Handler
 	if format == "json" {

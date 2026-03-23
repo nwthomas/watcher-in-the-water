@@ -10,6 +10,7 @@ import (
 
 func TestParseURLList(t *testing.T) {
 	t.Parallel()
+
 	got := ParseURLList(" https://a.test , https://b.test , ")
 	if len(got) != 2 || got[0] != "https://a.test" || got[1] != "https://b.test" {
 		t.Fatalf("ParseURLList = %#v", got)

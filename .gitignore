@@ -32,5 +32,8 @@ go.work.sum
 # Build files
 bin/
 
+# State file
+tmp/
+
 # Miscellaneous
 .DS_Store

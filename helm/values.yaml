@@ -1,5 +1,3 @@
-# Default values for watcher-in-the-water
-
 replicaCount: 1
 
 image:
@@ -92,7 +90,7 @@ persistence:
   enabled: true
   mountPath: /var/lib/watcher
   size: 1Gi
-  storageClassName: ""
+  storageClassName: longhorn
 
 # Extra env vars: plain values, or from ConfigMap/Secret via valueFrom
 # extraEnv:

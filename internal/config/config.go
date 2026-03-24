@@ -9,7 +9,7 @@ import (
 const (
 	DEFAULT_SERVER_PORT    = "8080"
 	DEFAULT_STATE_PATH     = "/var/lib/watcher/state.json"
-	DEFAULT_CHECK_INTERVAL = "5m"
+	DEFAULT_CHECK_INTERVAL = "30s"
 	DEFAULT_LOG_FORMAT     = "text"
 	DEFAULT_LOG_LEVEL      = "info"
 )

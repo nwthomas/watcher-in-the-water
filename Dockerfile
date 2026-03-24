@@ -21,6 +21,10 @@ RUN adduser -D -u 1000 appuser
 COPY --from=builder /app/server .
 RUN chown appuser:appuser server
 
+# Default state path (STATE_PATH) is /var/lib/watcher/state.json — must be writable by appuser.
+# A named volume mounted here picks up this ownership when the volume is first populated from the image.
+RUN mkdir -p /var/lib/watcher && chown appuser:appuser /var/lib/watcher
+
 USER appuser
 
 EXPOSE 8080

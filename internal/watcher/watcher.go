@@ -20,7 +20,7 @@ type Config struct {
 }
 
 // Run polls public IP on an interval until ctx is cancelled. On first successful fetch,
-// ready is set (if non-nil). Logs when the IP changes from a non-empty previous value.
+// ready is set (if non-nil). Logs each successful check (unchanged or changed) and state errors.
 func Run(ctx context.Context, cfg Config, ready *atomic.Bool) {
 	interval := cfg.PollInterval
 	if interval <= 0 {
@@ -76,6 +76,7 @@ func pollOnce(ctx context.Context, client *http.Client, urls []string, statePath
 		return
 	}
 	if previous.PublicIP == ip {
+		slog.Info("public ip verified", "public_ip", ip, "changed", false)
 		return
 	}
 

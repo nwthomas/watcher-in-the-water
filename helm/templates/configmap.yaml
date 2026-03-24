@@ -1,12 +1,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: { { include "watcher-in-the-water.configmapName" . } }
-  labels: { { - include "watcher-in-the-water.labels" . | nindent 4 } }
+  name: {{ include "watcher-in-the-water.configmapName" . }}
+  labels:
+    {{- include "watcher-in-the-water.labels" . | nindent 4 }}
 data:
-  PORT: { { .Values.app.port | quote } }
-  LOG_FORMAT: { { .Values.app.logFormat | quote } }
-  LOG_LEVEL: { { .Values.app.logLevel | quote } }
-  CHECK_INTERVAL: { { .Values.app.checkInterval | quote } }
-  STATE_PATH: { { .Values.app.statePath | quote } }
-  IP_URLS: { { .Values.app.ipUrls | quote } }
+  PORT: {{ .Values.app.port | quote }}
+  LOG_FORMAT: {{ .Values.app.logFormat | quote }}
+  LOG_LEVEL: {{ .Values.app.logLevel | quote }}
+  CHECK_INTERVAL: {{ .Values.app.checkInterval | quote }}
+  STATE_PATH: {{ .Values.app.statePath | quote }}
+  IP_URLS: {{ .Values.app.ipUrls | quote }}

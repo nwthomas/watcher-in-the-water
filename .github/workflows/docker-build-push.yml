@@ -33,6 +33,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v6
@@ -79,7 +81,9 @@ jobs:
 
       - name: Extract short SHA
         id: sha
-        run: echo "short_sha=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+        env:
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: echo "short_sha=${HEAD_SHA:0:7}" >> $GITHUB_OUTPUT
 
       - name: Update values.yaml with new image tag
         run: |
@@ -95,6 +99,7 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          base: ${{ github.event.workflow_run.head_branch }}
           commit-message: "feat: update image tag to ${{ steps.sha.outputs.short_sha }}"
           title: "Update image tag to ${{ steps.sha.outputs.short_sha }} for deployment"
           # NOTE: Update the if condition for running this entire workflow if the automated PR body changes.
@@ -105,7 +110,7 @@ jobs:
 
             **Changes:**
             - Updated `image.tag` to `${{ steps.sha.outputs.short_sha }}`
-            - Image built from commit: ${{ github.sha }}
+            - Image built from commit: ${{ github.event.workflow_run.head_sha }}
 
             **Docker Image:**
             `${{ env.REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.sha.outputs.short_sha }}`

@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "golang-server-boilerplate.fullname" . }}
+  name: {{ include "watcher-in-the-water.fullname" . }}
   labels:
-    {{- include "golang-server-boilerplate.labels" . | nindent 4 }}
+    {{- include "watcher-in-the-water.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "golang-server-boilerplate.selectorLabels" . | nindent 6 }}
+      {{- include "watcher-in-the-water.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,20 +18,20 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "golang-server-boilerplate.selectorLabels" . | nindent 8 }}
+        {{- include "watcher-in-the-water.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "golang-server-boilerplate.serviceAccountName" . }}
+      serviceAccountName: {{ include "watcher-in-the-water.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: {{ include "golang-server-boilerplate.image" . }}
+          image: {{ include "watcher-in-the-water.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
@@ -66,27 +66,32 @@ spec:
             - name: PORT
               valueFrom:
                 configMapKeyRef:
-                  name: {{ include "golang-server-boilerplate.configmapName" . }}
+                  name: {{ include "watcher-in-the-water.configmapName" . }}
                   key: PORT
             - name: LOG_FORMAT
               valueFrom:
                 configMapKeyRef:
-                  name: {{ include "golang-server-boilerplate.configmapName" . }}
+                  name: {{ include "watcher-in-the-water.configmapName" . }}
                   key: LOG_FORMAT
+            - name: LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "watcher-in-the-water.configmapName" . }}
+                  key: LOG_LEVEL
             - name: CHECK_INTERVAL
               valueFrom:
                 configMapKeyRef:
-                  name: {{ include "golang-server-boilerplate.configmapName" . }}
+                  name: {{ include "watcher-in-the-water.configmapName" . }}
                   key: CHECK_INTERVAL
             - name: STATE_PATH
               valueFrom:
                 configMapKeyRef:
-                  name: {{ include "golang-server-boilerplate.configmapName" . }}
+                  name: {{ include "watcher-in-the-water.configmapName" . }}
                   key: STATE_PATH
             - name: IP_URLS
               valueFrom:
                 configMapKeyRef:
-                  name: {{ include "golang-server-boilerplate.configmapName" . }}
+                  name: {{ include "watcher-in-the-water.configmapName" . }}
                   key: IP_URLS
           {{- range .Values.extraEnv }}
             - name: {{ .name }}
@@ -117,7 +122,7 @@ spec:
         - name: state
           {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
-            claimName: {{ include "golang-server-boilerplate.fullname" . }}-state
+            claimName: {{ include "watcher-in-the-water.fullname" . }}-state
           {{- else }}
           emptyDir: {}
           {{- end }}

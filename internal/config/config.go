@@ -11,10 +11,12 @@ const (
 	DEFAULT_STATE_PATH     = "/var/lib/watcher/state.json"
 	DEFAULT_CHECK_INTERVAL = "5m"
 	DEFAULT_LOG_FORMAT     = "text"
+	DEFAULT_LOG_LEVEL      = "info"
 )
 
 type ServerConfig struct {
 	LogFormat     string
+	LogLevel      string
 	Port          string
 	StatePath     string
 	CheckInterval time.Duration
@@ -33,6 +35,7 @@ func GetEnv(key, defaultVal string) string {
 func LoadServerConfig() ServerConfig {
 	return ServerConfig{
 		LogFormat:     GetEnv("LOG_FORMAT", DEFAULT_LOG_FORMAT),
+		LogLevel:      GetEnv("LOG_LEVEL", DEFAULT_LOG_LEVEL),
 		Port:          GetEnv("PORT", DEFAULT_SERVER_PORT),
 		StatePath:     GetEnv("STATE_PATH", DEFAULT_STATE_PATH),
 		CheckInterval: parseDurationEnv("CHECK_INTERVAL", DEFAULT_CHECK_INTERVAL),

@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "golang-server-boilerplate.fullname" . }}-state
+  name: {{ include "watcher-in-the-water.fullname" . }}-state
   labels:
-    {{- include "golang-server-boilerplate.labels" . | nindent 4 }}
+    {{- include "watcher-in-the-water.labels" . | nindent 4 }}
 spec:
   accessModes:
     - ReadWriteOnce

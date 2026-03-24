@@ -25,7 +25,8 @@ USER appuser
 
 EXPOSE 8080
 
+# Respects PORT at runtime (defaults to 8080)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget -q -O- http://localhost:8080/health/live || exit 1
+  CMD sh -c 'wget -q -O- "http://127.0.0.1:${PORT:-8080}/health/live" || exit 1'
 
 ENTRYPOINT ["./server"]

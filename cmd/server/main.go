@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -51,7 +50,7 @@ func panicRecovery(next http.Handler) http.Handler {
 					"panic", p,
 					"path", r.URL.Path,
 					"stack", string(debug.Stack()))
-				http.Error(w, fmt.Sprintf("internal server error: %v", p), http.StatusInternalServerError)
+				http.Error(w, "internal server error", http.StatusInternalServerError)
 			}
 		}()
 		next.ServeHTTP(w, r)
@@ -61,7 +60,7 @@ func panicRecovery(next http.Handler) http.Handler {
 func main() {
 	cfg := config.LoadServerConfig()
 
-	logger.Init(cfg.LogFormat)
+	logger.Init(cfg.LogFormat, cfg.LogLevel)
 
 	ipURLs := publicip.ParseURLList(cfg.IPURLs)
 

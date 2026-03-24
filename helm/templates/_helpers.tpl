@@ -1,14 +1,14 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "golang-server-boilerplate.name" -}}
+{{- define "watcher-in-the-water.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Create a default fully qualified app name.
 */}}
-{{- define "golang-server-boilerplate.fullname" -}}
+{{- define "watcher-in-the-water.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -24,16 +24,16 @@ Create a default fully qualified app name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "golang-server-boilerplate.chart" -}}
+{{- define "watcher-in-the-water.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "golang-server-boilerplate.labels" -}}
-helm.sh/chart: {{ include "golang-server-boilerplate.chart" . }}
-{{ include "golang-server-boilerplate.selectorLabels" . }}
+{{- define "watcher-in-the-water.labels" -}}
+helm.sh/chart: {{ include "watcher-in-the-water.chart" . }}
+{{ include "watcher-in-the-water.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -43,17 +43,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "golang-server-boilerplate.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "golang-server-boilerplate.name" . }}
+{{- define "watcher-in-the-water.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "watcher-in-the-water.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "golang-server-boilerplate.serviceAccountName" -}}
+{{- define "watcher-in-the-water.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "golang-server-boilerplate.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "watcher-in-the-water.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
@@ -62,7 +62,7 @@ Create the name of the service account to use
 {{/*
 Create the image name
 */}}
-{{- define "golang-server-boilerplate.image" -}}
+{{- define "watcher-in-the-water.image" -}}
 {{- $tag := .Values.image.tag | default .Chart.AppVersion }}
 {{- printf "%s:%s" .Values.image.repository $tag }}
 {{- end }}
@@ -70,13 +70,13 @@ Create the image name
 {{/*
 Create configmap name
 */}}
-{{- define "golang-server-boilerplate.configmapName" -}}
-{{- printf "%s-config" (include "golang-server-boilerplate.fullname" .) }}
+{{- define "watcher-in-the-water.configmapName" -}}
+{{- printf "%s-config" (include "watcher-in-the-water.fullname" .) }}
 {{- end }}
 
 {{/*
 Create secret name
 */}}
-{{- define "golang-server-boilerplate.secretName" -}}
-{{- printf "%s-secret" (include "golang-server-boilerplate.fullname" .) }}
+{{- define "watcher-in-the-water.secretName" -}}
+{{- printf "%s-secret" (include "watcher-in-the-water.fullname" .) }}
 {{- end }}

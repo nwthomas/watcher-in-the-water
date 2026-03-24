@@ -76,6 +76,7 @@ func TestLoadServerConfig(t *testing.T) {
 			env:  nil,
 			want: ServerConfig{
 				LogFormat:     DEFAULT_LOG_FORMAT,
+				LogLevel:      DEFAULT_LOG_LEVEL,
 				Port:          DEFAULT_SERVER_PORT,
 				StatePath:     DEFAULT_STATE_PATH,
 				CheckInterval: mustParse(DEFAULT_CHECK_INTERVAL),
@@ -86,6 +87,7 @@ func TestLoadServerConfig(t *testing.T) {
 			name: "overrides",
 			env: map[string]string{
 				"LOG_FORMAT":     "json",
+				"LOG_LEVEL":      "debug",
 				"PORT":           "3000",
 				"STATE_PATH":     "/tmp/x.json",
 				"CHECK_INTERVAL": "10s",
@@ -93,6 +95,7 @@ func TestLoadServerConfig(t *testing.T) {
 			},
 			want: ServerConfig{
 				LogFormat:     "json",
+				LogLevel:      "debug",
 				Port:          "3000",
 				StatePath:     "/tmp/x.json",
 				CheckInterval: 10 * time.Second,
@@ -106,6 +109,7 @@ func TestLoadServerConfig(t *testing.T) {
 			},
 			want: ServerConfig{
 				LogFormat:     DEFAULT_LOG_FORMAT,
+				LogLevel:      DEFAULT_LOG_LEVEL,
 				Port:          DEFAULT_SERVER_PORT,
 				StatePath:     DEFAULT_STATE_PATH,
 				CheckInterval: mustParse(DEFAULT_CHECK_INTERVAL),
@@ -114,7 +118,7 @@ func TestLoadServerConfig(t *testing.T) {
 		},
 	}
 
-	keys := []string{"LOG_FORMAT", "PORT", "STATE_PATH", "CHECK_INTERVAL", "IP_URLS"}
+	keys := []string{"LOG_FORMAT", "LOG_LEVEL", "PORT", "STATE_PATH", "CHECK_INTERVAL", "IP_URLS"}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, k := range keys {

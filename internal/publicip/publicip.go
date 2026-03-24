@@ -21,8 +21,8 @@ var DefaultURLs = []string{
 }
 
 const (
-	TIMOUT_FETCH_S = 15 * time.Second
-	MAX_BODY_BYTES = 4096
+	TIMEOUT_FETCH_S = 15 * time.Second
+	MAX_BODY_BYTES  = 4096
 )
 
 type ipifyJSON struct {
@@ -70,7 +70,7 @@ func validateIPString(s string) (string, error) {
 
 func fetchOne(ctx context.Context, client *http.Client, rawURL string) (string, error) {
 	if client == nil {
-		client = &http.Client{Timeout: TIMOUT_FETCH_S}
+		client = &http.Client{Timeout: TIMEOUT_FETCH_S}
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)

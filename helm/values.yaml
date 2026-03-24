@@ -3,7 +3,8 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/nwthomas/watcher-in-the-water
+  # Matches CI: docker.io/$DOCKER_USERNAME/watcher-in-the-water
+  repository: docker.io/nwthomas/watcher-in-the-water
   pullPolicy: IfNotPresent
   tag: "latest"
 
@@ -28,7 +29,7 @@ securityContext:
   capabilities:
     drop:
       - ALL
-  readOnlyRootFilesystem: false
+  readOnlyRootFilesystem: true
   runAsNonRoot: true
   runAsUser: 1000
 
@@ -56,6 +57,8 @@ resources:
     cpu: 100m
     memory: 128Mi
 
+# Do not raise maxReplicas above 1 while persistence is enabled: the chart uses a
+# single ReadWriteOnce PVC, so extra replicas cannot share the state volume.
 autoscaling:
   enabled: false
   minReplicas: 1
@@ -80,6 +83,7 @@ healthCheck:
 app:
   port: 8080
   logFormat: json
+  logLevel: info
   checkInterval: 5m
   statePath: /var/lib/watcher/state.json
   ipUrls: ""
@@ -113,3 +117,7 @@ extraEnv: []
 #   - configMapRef:
 #       name: my-app-config
 extraEnvFrom: []
+
+# Set true only if you add data to templates/secret.yaml (or use external secret tooling)
+secret:
+  create: false

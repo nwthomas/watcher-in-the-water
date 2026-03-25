@@ -1,7 +1,6 @@
 replicaCount: 1
 
 image:
-  # Matches CI: docker.io/$DOCKER_USERNAME/watcher-in-the-water
   repository: docker.io/nwthomas/watcher-in-the-water
   pullPolicy: IfNotPresent
   tag: "latest"
@@ -89,7 +88,7 @@ app:
 persistence:
   enabled: true
   mountPath: /var/lib/watcher
-  size: 1Gi
+  size: 10Mi
   storageClassName: longhorn
 
 # Extra env vars: plain values, or from ConfigMap/Secret via valueFrom

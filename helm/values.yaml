@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: docker.io/nwthomas/watcher-in-the-water
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "9fa494b"
 
 imagePullSecrets: []
 nameOverride: ""

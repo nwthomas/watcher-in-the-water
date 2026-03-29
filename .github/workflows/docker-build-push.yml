@@ -87,7 +87,8 @@ jobs:
 
       - name: Update values.yaml with new image tag
         run: |
-          sed -i 's/tag: ".*"/tag: "${{ steps.sha.outputs.short_sha }}"/' helm/values.yaml
+          # Must match docker/metadata-action type=sha default tag: sha-<shortsha>
+          sed -i 's/tag: ".*"/tag: "sha-${{ steps.sha.outputs.short_sha }}"/' helm/values.yaml
 
       - name: Configure git for GPG signing
         run: |
@@ -109,11 +110,11 @@ jobs:
             This PR updates the Helm values.yaml file with the latest image tag.
 
             **Changes:**
-            - Updated `image.tag` to `${{ steps.sha.outputs.short_sha }}`
+            - Updated `image.tag` to `sha-${{ steps.sha.outputs.short_sha }}` (matches metadata-action `type=sha` tags)
             - Image built from commit: ${{ github.event.workflow_run.head_sha }}
 
             **Docker Image:**
-            `${{ env.REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:${{ steps.sha.outputs.short_sha }}`
+            `${{ env.REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:sha-${{ steps.sha.outputs.short_sha }}`
 
             This PR was automatically created after successfully building and pushing the Docker image.
           branch: update-image-tag

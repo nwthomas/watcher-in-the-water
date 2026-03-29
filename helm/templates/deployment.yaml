@@ -93,6 +93,11 @@ spec:
                 configMapKeyRef:
                   name: {{ include "watcher-in-the-water.configmapName" . }}
                   key: IP_URLS
+            - name: WEBHOOK_URLS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "watcher-in-the-water.configmapName" . }}
+                  key: WEBHOOK_URLS
           {{- range .Values.extraEnv }}
             - name: {{ .name }}
               {{- if .valueFrom }}

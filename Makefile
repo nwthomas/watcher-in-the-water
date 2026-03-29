@@ -10,9 +10,11 @@ run-local: build
 	./scripts/start.sh local
 
 run-eng: build
+	@test -f env/eng.env || cp env/eng.env.example env/eng.env
 	./scripts/start.sh eng
 
 run-prod: build
+	@test -f env/prod.env || cp env/prod.env.example env/prod.env
 	./scripts/start.sh prod
 
 test:

@@ -84,6 +84,8 @@ app:
   checkInterval: 30s
   statePath: /var/lib/watcher/state.json
   ipUrls: ""
+  # Comma-separated URLs to POST JSON when the public IP changes (previous_ip, current_ip, updated_at)
+  webhookUrls: ""
 
 persistence:
   enabled: true

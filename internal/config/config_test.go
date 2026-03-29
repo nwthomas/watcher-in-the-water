@@ -81,6 +81,7 @@ func TestLoadServerConfig(t *testing.T) {
 				StatePath:     DEFAULT_STATE_PATH,
 				CheckInterval: mustParse(DEFAULT_CHECK_INTERVAL),
 				IPURLs:        "",
+				WebhookURLs:   "",
 			},
 		},
 		{
@@ -92,6 +93,7 @@ func TestLoadServerConfig(t *testing.T) {
 				"STATE_PATH":     "/tmp/x.json",
 				"CHECK_INTERVAL": "10s",
 				"IP_URLS":        "https://example.com",
+				"WEBHOOK_URLS":   "https://hooks.example.com/a, https://hooks.example.com/b",
 			},
 			want: ServerConfig{
 				LogFormat:     "json",
@@ -100,6 +102,7 @@ func TestLoadServerConfig(t *testing.T) {
 				StatePath:     "/tmp/x.json",
 				CheckInterval: 10 * time.Second,
 				IPURLs:        "https://example.com",
+				WebhookURLs:   "https://hooks.example.com/a, https://hooks.example.com/b",
 			},
 		},
 		{
@@ -114,11 +117,12 @@ func TestLoadServerConfig(t *testing.T) {
 				StatePath:     DEFAULT_STATE_PATH,
 				CheckInterval: mustParse(DEFAULT_CHECK_INTERVAL),
 				IPURLs:        "",
+				WebhookURLs:   "",
 			},
 		},
 	}
 
-	keys := []string{"LOG_FORMAT", "LOG_LEVEL", "PORT", "STATE_PATH", "CHECK_INTERVAL", "IP_URLS"}
+	keys := []string{"LOG_FORMAT", "LOG_LEVEL", "PORT", "STATE_PATH", "CHECK_INTERVAL", "IP_URLS", "WEBHOOK_URLS"}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, k := range keys {

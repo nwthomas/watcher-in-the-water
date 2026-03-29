@@ -21,6 +21,7 @@ type ServerConfig struct {
 	StatePath     string
 	CheckInterval time.Duration
 	IPURLs        string
+	WebhookURLs   string
 }
 
 // GetEnv returns the environment variable value if set, otherwise the default value
@@ -40,6 +41,7 @@ func LoadServerConfig() ServerConfig {
 		StatePath:     GetEnv("STATE_PATH", DEFAULT_STATE_PATH),
 		CheckInterval: parseDurationEnv("CHECK_INTERVAL", DEFAULT_CHECK_INTERVAL),
 		IPURLs:        GetEnv("IP_URLS", ""),
+		WebhookURLs:   GetEnv("WEBHOOK_URLS", ""),
 	}
 }
 

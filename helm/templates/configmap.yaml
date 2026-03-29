@@ -11,3 +11,4 @@ data:
   CHECK_INTERVAL: {{ .Values.app.checkInterval | quote }}
   STATE_PATH: {{ .Values.app.statePath | quote }}
   IP_URLS: {{ .Values.app.ipUrls | quote }}
+  WEBHOOK_URLS: {{ .Values.app.webhookUrls | quote }}

@@ -63,6 +63,7 @@ func main() {
 	logger.Init(cfg.LogFormat, cfg.LogLevel)
 
 	ipURLs := publicip.ParseURLList(cfg.IPURLs)
+	webhookURLs := publicip.ParseURLList(cfg.WebhookURLs)
 
 	var ready atomic.Bool
 
@@ -95,6 +96,7 @@ func main() {
 		StatePath:    cfg.StatePath,
 		PollInterval: cfg.CheckInterval,
 		IPURLs:       ipURLs,
+		WebhookURLs:  webhookURLs,
 	}, &ready)
 
 	<-ctx.Done()

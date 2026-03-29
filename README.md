@@ -38,7 +38,7 @@ Run the binary without Make after `make build` and a filled-in `env/local.env`:
 set -a && source env/local.env && set +a && ./bin/server
 ```
 
-Configuration is via environment variables (see `internal/config` and the `env/*.env.example` files). Important keys include `PORT`, `LOG_FORMAT`, `LOG_LEVEL`, `CHECK_INTERVAL`, `STATE_PATH`, and `IP_URLS`.
+Configuration is via environment variables (see `internal/config` and the `env/*.env.example` files). Important keys include `PORT`, `LOG_FORMAT`, `LOG_LEVEL`, `CHECK_INTERVAL`, `STATE_PATH`, `IP_URLS`, and `WEBHOOK_URLS` (comma-separated URLs; each receives a JSON POST when the public IP changes).
 
 ## Tests
 

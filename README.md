@@ -4,7 +4,7 @@
 
 This repository contains a Go server that monitors IP address assignment changes from your internet service provider (ISP) via dynamic host configuration protocol (DHCP).
 
-You can then have it make callbacks via webhooks to any URLs that you want.
+You can then have it make callbacks via webhooks to any URLs that you want which will include the new IP address in the request body.
 
 ## Project Structure
 
@@ -24,20 +24,20 @@ You can then have it make callbacks via webhooks to any URLs that you want.
 
 ## Build and Run Locally
 
-| Command          | Description                                                                                    |
-| ---------------- | ---------------------------------------------------------------------------------------------- |
-| `make build`     | Compile to `bin/server`.                                                                       |
-| `make run-local` | Ensure `env/local.env` exists (from `env/local.env.example` if needed), then start the server. |
-| `make run-eng`   | Loads `env/eng.env` (create it; you can start from `env/staging.env.example`).                 |
-| `make run-prod`  | Run with `env/prod.env` (create from `env/prod.env.example` first).                            |
+| Command          | Description                                                            |
+| ---------------- | ---------------------------------------------------------------------- |
+| `make build`     | Compile to `bin/server`                                                |
+| `make run-local` | Ensure `env/local.env` exists (and copy if not) before starning server |
+| `make run-eng`   | Ensure `env/eng.env` exists (and copy if not) before starning server   |
+| `make run-prod`  | Ensure `env/prod.env` exists (and copy if not) before starning server  |
 
 You can configure the `.env` files in `env/*.env.example` to create corresponding `*.env` files and customize the variables to your heart's content.
 
 ## Testing
 
-| Command              | Description                                                        |
-| -------------------- | ------------------------------------------------------------------ |
-| `make test`          | Run all Go tests.                                                  |
-| `make test-coverage` | Tests plus `coverage.out` / `coverage.html`.                       |
-| `make lint`          | `golangci-lint` (same family of checks as CI when versions align). |
-| `make fmt`           | `go fmt ./...`                                                     |
+| Command              | Description                                                       |
+| -------------------- | ----------------------------------------------------------------- |
+| `make test`          | Run all Go tests                                                  |
+| `make test-coverage` | Tests plus `coverage.out` / `coverage.html`                       |
+| `make lint`          | `golangci-lint` (same family of checks as CI when versions align) |
+| `make fmt`           | `go fmt ./...`                                                    |

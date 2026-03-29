@@ -69,8 +69,10 @@ affinity: {}
 healthCheck:
   enabled: true
   livenessPath: /health/live
-  readinessPath: /health/ready
-  # Allow time for the first outbound public-IP poll before readiness must succeed.
+  # Use /health/live so the Deployment can become Ready without outbound internet (readiness
+  # would otherwise wait forever on /health/ready until the first successful IP poll).
+  # Set to /health/ready if pods have egress and you want Ready=false until the watcher succeeds.
+  readinessPath: /health/live
   initialDelaySeconds: 15
   periodSeconds: 30
   timeoutSeconds: 10

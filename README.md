@@ -31,7 +31,7 @@ You can then have it make callbacks via webhooks to any URLs that you want which
 | `make run-eng`   | Ensure `env/eng.env` exists (and copy if not) before starning server   |
 | `make run-prod`  | Ensure `env/prod.env` exists (and copy if not) before starning server  |
 
-You can configure the `.env` files in `env/*.env.example` to create corresponding `*.env` files and customize the variables to your heart's content.
+You can configure the `.env` files in `env/*.env.example` to create corresponding `*.env` files and customize the variables.
 
 ## Testing
 

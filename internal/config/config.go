@@ -15,13 +15,18 @@ const (
 )
 
 type ServerConfig struct {
-	LogFormat     string
-	LogLevel      string
-	Port          string
-	StatePath     string
-	CheckInterval time.Duration
-	IPURLs        string
-	WebhookURLs   string
+	LogFormat          string
+	LogLevel           string
+	Port               string
+	StatePath          string
+	CheckInterval      time.Duration
+	IPURLs             string
+	EmailHostName      string
+	EmailPassword      string
+	EmailPersonalEmail string
+	EmailPort          string
+	EmailTLS           string
+	EmailUsername      string
 }
 
 // GetEnv returns the environment variable value if set, otherwise the default value
@@ -35,13 +40,18 @@ func GetEnv(key, defaultVal string) string {
 // LoadServerConfig reads server and watcher settings from the environment
 func LoadServerConfig() ServerConfig {
 	return ServerConfig{
-		LogFormat:     GetEnv("LOG_FORMAT", DEFAULT_LOG_FORMAT),
-		LogLevel:      GetEnv("LOG_LEVEL", DEFAULT_LOG_LEVEL),
-		Port:          GetEnv("PORT", DEFAULT_SERVER_PORT),
-		StatePath:     GetEnv("STATE_PATH", DEFAULT_STATE_PATH),
-		CheckInterval: parseDurationEnv("CHECK_INTERVAL", DEFAULT_CHECK_INTERVAL),
-		IPURLs:        GetEnv("IP_URLS", ""),
-		WebhookURLs:   GetEnv("WEBHOOK_URLS", ""),
+		LogFormat:          GetEnv("LOG_FORMAT", DEFAULT_LOG_FORMAT),
+		LogLevel:           GetEnv("LOG_LEVEL", DEFAULT_LOG_LEVEL),
+		Port:               GetEnv("PORT", DEFAULT_SERVER_PORT),
+		StatePath:          GetEnv("STATE_PATH", DEFAULT_STATE_PATH),
+		CheckInterval:      parseDurationEnv("CHECK_INTERVAL", DEFAULT_CHECK_INTERVAL),
+		IPURLs:             GetEnv("IP_URLS", ""),
+		EmailHostName:      GetEnv("EMAIL_HOST_NAME", ""),
+		EmailPassword:      GetEnv("EMAIL_PASSWORD", ""),
+		EmailPersonalEmail: GetEnv("EMAIL_PERSONAL_EMAIL", ""),
+		EmailPort:          GetEnv("EMAIL_PORT", ""),
+		EmailTLS:           GetEnv("EMAIL_TLS", ""),
+		EmailUsername:      GetEnv("EMAIL_USERNAME", ""),
 	}
 }
 

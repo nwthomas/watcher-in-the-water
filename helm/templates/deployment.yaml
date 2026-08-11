@@ -93,11 +93,42 @@ spec:
                 configMapKeyRef:
                   name: {{ include "watcher-in-the-water.configmapName" . }}
                   key: IP_URLS
-            - name: WEBHOOK_URLS
+            - name: EMAIL_HOST_NAME
               valueFrom:
-                configMapKeyRef:
-                  name: {{ include "watcher-in-the-water.configmapName" . }}
-                  key: WEBHOOK_URLS
+                secretKeyRef:
+                  name: {{ required "email.secretName is required" .Values.email.secretName }}
+                  key: EMAIL_HOST_NAME
+                  optional: false
+            - name: EMAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "email.secretName is required" .Values.email.secretName }}
+                  key: EMAIL_PASSWORD
+                  optional: false
+            - name: EMAIL_PERSONAL_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "email.secretName is required" .Values.email.secretName }}
+                  key: EMAIL_PERSONAL_EMAIL
+                  optional: false
+            - name: EMAIL_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "email.secretName is required" .Values.email.secretName }}
+                  key: EMAIL_PORT
+                  optional: false
+            - name: EMAIL_TLS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "email.secretName is required" .Values.email.secretName }}
+                  key: EMAIL_TLS
+                  optional: false
+            - name: EMAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "email.secretName is required" .Values.email.secretName }}
+                  key: EMAIL_USERNAME
+                  optional: false
           {{- range .Values.extraEnv }}
             - name: {{ .name }}
               {{- if .valueFrom }}

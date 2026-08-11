@@ -9,16 +9,20 @@ import (
 
 	"github.com/nwthomas/watcher-in-the-water/internal/ipstate"
 	"github.com/nwthomas/watcher-in-the-water/internal/publicip"
-	"github.com/nwthomas/watcher-in-the-water/internal/webhook"
 )
+
+// EmailNotifier sends a notification when the public IP changes.
+type EmailNotifier interface {
+	NotifyIPChange(ctx context.Context, previousIP, currentIP string, updatedAt time.Time) error
+}
 
 // Config drives the public IP polling loop.
 type Config struct {
-	StatePath    string
-	PollInterval time.Duration
-	IPURLs       []string
-	WebhookURLs  []string
-	HTTPClient   *http.Client
+	StatePath     string
+	PollInterval  time.Duration
+	IPURLs        []string
+	EmailNotifier EmailNotifier
+	HTTPClient    *http.Client
 }
 
 // Run polls public IP on an interval until ctx is cancelled. On first successful fetch,
@@ -40,7 +44,7 @@ func Run(ctx context.Context, cfg Config, ready *atomic.Bool) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
-	pollOnce(ctx, client, urls, cfg.StatePath, cfg.WebhookURLs, ready)
+	pollOnce(ctx, client, urls, cfg.StatePath, cfg.EmailNotifier, ready)
 
 	for {
 		select {
@@ -48,12 +52,12 @@ func Run(ctx context.Context, cfg Config, ready *atomic.Bool) {
 			slog.Info("ip watcher stopped")
 			return
 		case <-ticker.C:
-			pollOnce(ctx, client, urls, cfg.StatePath, cfg.WebhookURLs, ready)
+			pollOnce(ctx, client, urls, cfg.StatePath, cfg.EmailNotifier, ready)
 		}
 	}
 }
 
-func pollOnce(ctx context.Context, client *http.Client, urls []string, statePath string, webhookURLs []string, ready *atomic.Bool) {
+func pollOnce(ctx context.Context, client *http.Client, urls []string, statePath string, emailNotifier EmailNotifier, ready *atomic.Bool) {
 	previous, err := ipstate.Load(statePath)
 	if err != nil {
 		slog.Error("load ip state", "path", statePath, "err", err)
@@ -92,5 +96,13 @@ func pollOnce(ctx context.Context, client *http.Client, urls []string, statePath
 		"previous_ip", previous.PublicIP,
 		"current_ip", ip,
 	)
-	webhook.NotifyIPChange(ctx, client, webhookURLs, previous.PublicIP, ip, next.UpdatedAt)
+	if emailNotifier == nil {
+		slog.Error("email notifier unavailable")
+		return
+	}
+	if err := emailNotifier.NotifyIPChange(ctx, previous.PublicIP, ip, next.UpdatedAt); err != nil {
+		slog.Error("email delivery failed", "err", err)
+		return
+	}
+	slog.Info("email delivered", "recipient_configured", true)
 }

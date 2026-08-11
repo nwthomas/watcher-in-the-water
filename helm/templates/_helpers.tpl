@@ -73,10 +73,3 @@ Create configmap name
 {{- define "watcher-in-the-water.configmapName" -}}
 {{- printf "%s-config" (include "watcher-in-the-water.fullname" .) }}
 {{- end }}
-
-{{/*
-Create secret name
-*/}}
-{{- define "watcher-in-the-water.secretName" -}}
-{{- printf "%s-secret" (include "watcher-in-the-water.fullname" .) }}
-{{- end }}

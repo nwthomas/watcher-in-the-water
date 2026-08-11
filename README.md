@@ -4,7 +4,7 @@
 
 This repository contains a Go server that monitors IP address assignment changes from your internet service provider (ISP) via dynamic host configuration protocol (DHCP).
 
-You can then have it make callbacks via webhooks to any URLs that you want which will include the new IP address in the request body.
+When the public IP changes, it sends an email through SMTP with the previous and current IP address.
 
 ## Project Structure
 
@@ -16,11 +16,43 @@ You can then have it make callbacks via webhooks to any URLs that you want which
 │   ├── ipstate/         # Persisted JSON state on disk
 │   ├── publicip/        # Fetch and validate public IP from HTTP endpoints
 │   ├── watcher/         # Polling loop and change detection
-│   └── webhook/         # Sends new ip address payload to webhook urls
+│   └── email/           # Sends IP change email notifications through SMTP
 ├── helm/                # Kubernetes chart (Deployment, PVC, probes, …)
 ├── scripts/start.sh     # Load env file and exec the binary
 ├── env/*.env.example    # Example .env files to be modified before running server
 ```
+
+## Configuration
+
+Runtime configuration is driven by:
+
+- `PORT`
+- `LOG_FORMAT`
+- `LOG_LEVEL`
+- `STATE_PATH`
+- `CHECK_INTERVAL`
+- `IP_URLS`
+- `EMAIL_HOST_NAME`
+- `EMAIL_PASSWORD`
+- `EMAIL_PERSONAL_EMAIL`
+- `EMAIL_PORT`
+- `EMAIL_TLS`
+- `EMAIL_USERNAME`
+
+Email configuration is required at startup. If any `EMAIL_*` variable is missing or invalid, the server exits immediately so deployments fail loudly instead of monitoring without notifications.
+
+Configure the SMTP settings with your provider's values:
+
+```text
+EMAIL_HOST_NAME=smtp.example.com
+EMAIL_PORT=587
+EMAIL_TLS=true
+EMAIL_USERNAME=sender@example.com
+EMAIL_PASSWORD=your-smtp-password
+EMAIL_PERSONAL_EMAIL=you@example.com
+```
+
+`EMAIL_USERNAME` is the account used to authenticate and send the message. `EMAIL_PASSWORD` is the SMTP password for that account. `EMAIL_PERSONAL_EMAIL` is the destination address.
 
 ## Build and Run Locally
 
@@ -32,6 +64,23 @@ You can then have it make callbacks via webhooks to any URLs that you want which
 | `make run-prod`  | Ensure `env/prod.env` exists (and copy if not) before starning server  |
 
 You can configure the `.env` files in `env/*.env.example` to create corresponding `*.env` files and customize the variables.
+
+## Kubernetes and Sealed Secrets
+
+The Helm chart reads all email configuration from a Kubernetes Secret:
+
+- Secret name: `watcher-email` by default
+- Secret keys: `EMAIL_HOST_NAME`, `EMAIL_PASSWORD`, `EMAIL_PERSONAL_EMAIL`, `EMAIL_PORT`, `EMAIL_TLS`, and `EMAIL_USERNAME`
+
+The intended flow is:
+
+1. Create a `SealedSecret` containing encrypted values for every required `EMAIL_*` key.
+2. Let the Sealed Secrets controller materialize the backing Kubernetes `Secret`.
+3. Deploy this chart so the pod consumes those keys via `secretKeyRef`.
+
+If the Secret or any required key is missing, Kubernetes will not start the container. If a value is present but empty or invalid, the server exits during startup.
+
+An example manifest is provided at [helm/examples/email.sealedsecret.example.yaml](/Users/nathanthomas/Developer/watcher-in-the-water/helm/examples/email.sealedsecret.example.yaml).
 
 ## Testing
 

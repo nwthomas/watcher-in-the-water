@@ -2,8 +2,7 @@ package watcher
 
 import (
 	"context"
-	"encoding/json"
-	"io"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
@@ -12,8 +11,23 @@ import (
 	"time"
 
 	"github.com/nwthomas/watcher-in-the-water/internal/ipstate"
-	"github.com/nwthomas/watcher-in-the-water/internal/webhook"
 )
+
+type recordingEmailNotifier struct {
+	calls     int
+	previous  string
+	current   string
+	updatedAt time.Time
+	err       error
+}
+
+func (n *recordingEmailNotifier) NotifyIPChange(_ context.Context, previousIP, currentIP string, updatedAt time.Time) error {
+	n.calls++
+	n.previous = previousIP
+	n.current = currentIP
+	n.updatedAt = updatedAt
+	return n.err
+}
 
 func TestPollOnce_seedsWhenEmpty(t *testing.T) {
 	t.Parallel()
@@ -26,7 +40,8 @@ func TestPollOnce_seedsWhenEmpty(t *testing.T) {
 	defer srv.Close()
 
 	var ready atomic.Bool
-	pollOnce(context.Background(), &http.Client{}, []string{srv.URL}, statePath, nil, &ready)
+	notifier := &recordingEmailNotifier{}
+	pollOnce(context.Background(), &http.Client{}, []string{srv.URL}, statePath, notifier, &ready)
 
 	if !ready.Load() {
 		t.Fatal("expected ready after successful poll")
@@ -37,6 +52,9 @@ func TestPollOnce_seedsWhenEmpty(t *testing.T) {
 	}
 	if st.PublicIP != "192.0.2.10" {
 		t.Fatalf("stored ip = %q", st.PublicIP)
+	}
+	if notifier.calls != 0 {
+		t.Fatalf("email calls = %d, want 0", notifier.calls)
 	}
 }
 
@@ -54,7 +72,8 @@ func TestPollOnce_noChangeWhenSame(t *testing.T) {
 	defer srv.Close()
 
 	var ready atomic.Bool
-	pollOnce(context.Background(), &http.Client{}, []string{srv.URL}, statePath, nil, &ready)
+	notifier := &recordingEmailNotifier{}
+	pollOnce(context.Background(), &http.Client{}, []string{srv.URL}, statePath, notifier, &ready)
 	if !ready.Load() {
 		t.Fatal("expected ready")
 	}
@@ -65,6 +84,9 @@ func TestPollOnce_noChangeWhenSame(t *testing.T) {
 	// UpdatedAt should be unchanged path — we return early without save; verify IP still same
 	if before.PublicIP != "192.0.2.20" {
 		t.Fatalf("unexpected mutation: %+v", before)
+	}
+	if notifier.calls != 0 {
+		t.Fatalf("email calls = %d, want 0", notifier.calls)
 	}
 }
 
@@ -93,7 +115,7 @@ func TestPollOnce_updatesOnChange(t *testing.T) {
 	}
 }
 
-func TestPollOnce_updatesOnChange_callsWebhooks(t *testing.T) {
+func TestPollOnce_updatesOnChange_sendsEmail(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
 	statePath := filepath.Join(dir, "state.json")
@@ -101,18 +123,33 @@ func TestPollOnce_updatesOnChange_callsWebhooks(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var gotMethod string
-	var gotBody []byte
-	wh := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gotMethod = r.Method
-		var err error
-		gotBody, err = io.ReadAll(r.Body)
-		if err != nil {
-			t.Errorf("read body: %v", err)
-		}
-		w.WriteHeader(http.StatusNoContent)
+	ipSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("192.0.2.2"))
 	}))
-	defer wh.Close()
+	defer ipSrv.Close()
+
+	var ready atomic.Bool
+	notifier := &recordingEmailNotifier{}
+	pollOnce(context.Background(), &http.Client{}, []string{ipSrv.URL}, statePath, notifier, &ready)
+
+	if notifier.calls != 1 {
+		t.Fatalf("email calls = %d, want 1", notifier.calls)
+	}
+	if notifier.previous != "192.0.2.1" || notifier.current != "192.0.2.2" {
+		t.Fatalf("email notification = previous %q current %q", notifier.previous, notifier.current)
+	}
+	if notifier.updatedAt.IsZero() {
+		t.Fatal("expected updatedAt to be set")
+	}
+}
+
+func TestPollOnce_updatesOnChange_keepsStateWhenEmailFails(t *testing.T) {
+	t.Parallel()
+	dir := t.TempDir()
+	statePath := filepath.Join(dir, "state.json")
+	if err := ipstate.Save(statePath, ipstate.State{PublicIP: "192.0.2.1", UpdatedAt: time.Now().UTC()}); err != nil {
+		t.Fatal(err)
+	}
 
 	ipSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("192.0.2.2"))
@@ -120,16 +157,17 @@ func TestPollOnce_updatesOnChange_callsWebhooks(t *testing.T) {
 	defer ipSrv.Close()
 
 	var ready atomic.Bool
-	pollOnce(context.Background(), &http.Client{}, []string{ipSrv.URL}, statePath, []string{wh.URL}, &ready)
+	notifier := &recordingEmailNotifier{err: errors.New("smtp down")}
+	pollOnce(context.Background(), &http.Client{}, []string{ipSrv.URL}, statePath, notifier, &ready)
 
-	if gotMethod != http.MethodPost {
-		t.Fatalf("webhook method = %q", gotMethod)
-	}
-	var p webhook.ChangePayload
-	if err := json.Unmarshal(gotBody, &p); err != nil {
+	st, err := ipstate.Load(statePath)
+	if err != nil {
 		t.Fatal(err)
 	}
-	if p.PreviousIP != "192.0.2.1" || p.CurrentIP != "192.0.2.2" {
-		t.Fatalf("payload = %+v", p)
+	if st.PublicIP != "192.0.2.2" {
+		t.Fatalf("stored ip = %q, want 192.0.2.2", st.PublicIP)
+	}
+	if notifier.calls != 1 {
+		t.Fatalf("email calls = %d, want 1", notifier.calls)
 	}
 }

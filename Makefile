@@ -38,5 +38,11 @@ docker-run: docker-build
 		-e PORT=8080 -e LOG_FORMAT=text \
 		-e CHECK_INTERVAL=30s \
 		-e STATE_PATH=/var/lib/watcher/state.json \
+		-e EMAIL_HOST_NAME=smtp.example.com \
+		-e EMAIL_PASSWORD=replace-me \
+		-e EMAIL_PERSONAL_EMAIL=you@example.com \
+		-e EMAIL_PORT=587 \
+		-e EMAIL_TLS=true \
+		-e EMAIL_USERNAME=sender@example.com \
 		-v watcher-state:/var/lib/watcher \
 		watcher-in-the-water

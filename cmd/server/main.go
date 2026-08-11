@@ -15,6 +15,7 @@ import (
 	_ "go.uber.org/automaxprocs"
 
 	"github.com/nwthomas/watcher-in-the-water/internal/config"
+	"github.com/nwthomas/watcher-in-the-water/internal/email"
 	"github.com/nwthomas/watcher-in-the-water/internal/logger"
 	"github.com/nwthomas/watcher-in-the-water/internal/publicip"
 	"github.com/nwthomas/watcher-in-the-water/internal/watcher"
@@ -63,7 +64,18 @@ func main() {
 	logger.Init(cfg.LogFormat, cfg.LogLevel)
 
 	ipURLs := publicip.ParseURLList(cfg.IPURLs)
-	webhookURLs := publicip.ParseURLList(cfg.WebhookURLs)
+	emailConfig, err := email.ParseConfig(email.RawConfig{
+		HostName:      cfg.EmailHostName,
+		Password:      cfg.EmailPassword,
+		PersonalEmail: cfg.EmailPersonalEmail,
+		Port:          cfg.EmailPort,
+		TLS:           cfg.EmailTLS,
+		Username:      cfg.EmailUsername,
+	})
+	if err != nil {
+		slog.Error("invalid email config", "err", err)
+		os.Exit(1)
+	}
 
 	var ready atomic.Bool
 
@@ -93,10 +105,10 @@ func main() {
 	}()
 
 	go watcher.Run(ctx, watcher.Config{
-		StatePath:    cfg.StatePath,
-		PollInterval: cfg.CheckInterval,
-		IPURLs:       ipURLs,
-		WebhookURLs:  webhookURLs,
+		StatePath:     cfg.StatePath,
+		PollInterval:  cfg.CheckInterval,
+		IPURLs:        ipURLs,
+		EmailNotifier: email.SMTPNotifier{Config: emailConfig},
 	}, &ready)
 
 	<-ctx.Done()

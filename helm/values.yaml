@@ -111,10 +111,12 @@ persistence:
 #         key: url
 extraEnv: []
 
-# Load all keys from ConfigMap or Secret
+# Load all keys from ConfigMap or Secret. Email notifications read EMAIL_HOST_NAME, EMAIL_PORT,
+# EMAIL_TLS, EMAIL_USERNAME, EMAIL_PASSWORD, and EMAIL_PERSONAL_EMAIL from the environment; supply
+# them from the Secret that a SealedSecret unseals into (see README):
 # extraEnvFrom:
 #   - secretRef:
-#       name: my-app-secrets
+#       name: watcher-in-the-water-email
 #   - configMapRef:
 #       name: my-app-config
 extraEnvFrom: []

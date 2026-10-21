@@ -82,6 +82,8 @@ func TestLoadServerConfig(t *testing.T) {
 				CheckInterval: mustParse(DEFAULT_CHECK_INTERVAL),
 				IPURLs:        "",
 				WebhookURLs:   "",
+				EmailPort:     587,
+				EmailTLS:      true,
 			},
 		},
 		{
@@ -94,6 +96,13 @@ func TestLoadServerConfig(t *testing.T) {
 				"CHECK_INTERVAL": "10s",
 				"IP_URLS":        "https://example.com",
 				"WEBHOOK_URLS":   "https://hooks.example.com/a, https://hooks.example.com/b",
+
+				"EMAIL_HOST_NAME":      "smtp.mail.me.com",
+				"EMAIL_PASSWORD":       "app-specific-password",
+				"EMAIL_PERSONAL_EMAIL": "me@icloud.com",
+				"EMAIL_PORT":           "2525",
+				"EMAIL_TLS":            "false",
+				"EMAIL_USERNAME":       "me@icloud.com",
 			},
 			want: ServerConfig{
 				LogFormat:     "json",
@@ -103,6 +112,29 @@ func TestLoadServerConfig(t *testing.T) {
 				CheckInterval: 10 * time.Second,
 				IPURLs:        "https://example.com",
 				WebhookURLs:   "https://hooks.example.com/a, https://hooks.example.com/b",
+
+				EmailHostName:      "smtp.mail.me.com",
+				EmailPassword:      "app-specific-password",
+				EmailPersonalEmail: "me@icloud.com",
+				EmailPort:          2525,
+				EmailTLS:           false,
+				EmailUsername:      "me@icloud.com",
+			},
+		},
+		{
+			name: "invalid email port and tls fall back to defaults",
+			env: map[string]string{
+				"EMAIL_PORT": "not-a-port",
+				"EMAIL_TLS":  "maybe",
+			},
+			want: ServerConfig{
+				LogFormat:     DEFAULT_LOG_FORMAT,
+				LogLevel:      DEFAULT_LOG_LEVEL,
+				Port:          DEFAULT_SERVER_PORT,
+				StatePath:     DEFAULT_STATE_PATH,
+				CheckInterval: mustParse(DEFAULT_CHECK_INTERVAL),
+				EmailPort:     587,
+				EmailTLS:      true,
 			},
 		},
 		{
@@ -118,11 +150,14 @@ func TestLoadServerConfig(t *testing.T) {
 				CheckInterval: mustParse(DEFAULT_CHECK_INTERVAL),
 				IPURLs:        "",
 				WebhookURLs:   "",
+				EmailPort:     587,
+				EmailTLS:      true,
 			},
 		},
 	}
 
-	keys := []string{"LOG_FORMAT", "LOG_LEVEL", "PORT", "STATE_PATH", "CHECK_INTERVAL", "IP_URLS", "WEBHOOK_URLS"}
+	keys := []string{"LOG_FORMAT", "LOG_LEVEL", "PORT", "STATE_PATH", "CHECK_INTERVAL", "IP_URLS", "WEBHOOK_URLS",
+		"EMAIL_HOST_NAME", "EMAIL_PASSWORD", "EMAIL_PERSONAL_EMAIL", "EMAIL_PORT", "EMAIL_TLS", "EMAIL_USERNAME"}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			for _, k := range keys {

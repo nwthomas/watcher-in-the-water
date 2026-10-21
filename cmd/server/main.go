@@ -15,6 +15,7 @@ import (
 	_ "go.uber.org/automaxprocs"
 
 	"github.com/nwthomas/watcher-in-the-water/internal/config"
+	"github.com/nwthomas/watcher-in-the-water/internal/email"
 	"github.com/nwthomas/watcher-in-the-water/internal/logger"
 	"github.com/nwthomas/watcher-in-the-water/internal/publicip"
 	"github.com/nwthomas/watcher-in-the-water/internal/watcher"
@@ -57,6 +58,31 @@ func panicRecovery(next http.Handler) http.Handler {
 	})
 }
 
+// loadEmailConfig returns the email settings, or a zero Config (disabled) when unset or incomplete.
+func loadEmailConfig(cfg config.ServerConfig) email.Config {
+	emailCfg := email.Config{
+		HostName:      cfg.EmailHostName,
+		Port:          cfg.EmailPort,
+		TLS:           cfg.EmailTLS,
+		Username:      cfg.EmailUsername,
+		Password:      cfg.EmailPassword,
+		PersonalEmail: cfg.EmailPersonalEmail,
+	}
+	if !emailCfg.IsSet() {
+		return email.Config{}
+	}
+	if err := emailCfg.Validate(); err != nil {
+		slog.Warn("email notifications disabled", "err", err)
+		return email.Config{}
+	}
+	slog.Info("email notifications enabled",
+		"host", emailCfg.HostName,
+		"port", emailCfg.Port,
+		"tls", emailCfg.TLS,
+	)
+	return emailCfg
+}
+
 func main() {
 	cfg := config.LoadServerConfig()
 
@@ -64,6 +90,7 @@ func main() {
 
 	ipURLs := publicip.ParseURLList(cfg.IPURLs)
 	webhookURLs := publicip.ParseURLList(cfg.WebhookURLs)
+	emailCfg := loadEmailConfig(cfg)
 
 	var ready atomic.Bool
 
@@ -97,6 +124,7 @@ func main() {
 		PollInterval: cfg.CheckInterval,
 		IPURLs:       ipURLs,
 		WebhookURLs:  webhookURLs,
+		Email:        emailCfg,
 	}, &ready)
 
 	<-ctx.Done()

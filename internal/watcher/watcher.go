@@ -7,6 +7,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/nwthomas/watcher-in-the-water/internal/email"
 	"github.com/nwthomas/watcher-in-the-water/internal/ipstate"
 	"github.com/nwthomas/watcher-in-the-water/internal/publicip"
 	"github.com/nwthomas/watcher-in-the-water/internal/webhook"
@@ -18,6 +19,7 @@ type Config struct {
 	PollInterval time.Duration
 	IPURLs       []string
 	WebhookURLs  []string
+	Email        email.Config
 	HTTPClient   *http.Client
 }
 
@@ -40,7 +42,7 @@ func Run(ctx context.Context, cfg Config, ready *atomic.Bool) {
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
-	pollOnce(ctx, client, urls, cfg.StatePath, cfg.WebhookURLs, ready)
+	pollOnce(ctx, client, urls, cfg.StatePath, cfg.WebhookURLs, cfg.Email, ready)
 
 	for {
 		select {
@@ -48,12 +50,12 @@ func Run(ctx context.Context, cfg Config, ready *atomic.Bool) {
 			slog.Info("ip watcher stopped")
 			return
 		case <-ticker.C:
-			pollOnce(ctx, client, urls, cfg.StatePath, cfg.WebhookURLs, ready)
+			pollOnce(ctx, client, urls, cfg.StatePath, cfg.WebhookURLs, cfg.Email, ready)
 		}
 	}
 }
 
-func pollOnce(ctx context.Context, client *http.Client, urls []string, statePath string, webhookURLs []string, ready *atomic.Bool) {
+func pollOnce(ctx context.Context, client *http.Client, urls []string, statePath string, webhookURLs []string, emailCfg email.Config, ready *atomic.Bool) {
 	previous, err := ipstate.Load(statePath)
 	if err != nil {
 		slog.Error("load ip state", "path", statePath, "err", err)
@@ -93,4 +95,5 @@ func pollOnce(ctx context.Context, client *http.Client, urls []string, statePath
 		"current_ip", ip,
 	)
 	webhook.NotifyIPChange(ctx, client, webhookURLs, previous.PublicIP, ip, next.UpdatedAt)
+	email.NotifyIPChange(ctx, emailCfg, previous.PublicIP, ip, next.UpdatedAt)
 }

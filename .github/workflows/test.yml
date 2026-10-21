@@ -3,12 +3,12 @@ name: Tests
 on:
   push:
     branches: [main]
-    paths:
-      - "**"
+    paths-ignore:
+      - "helm/**"
   pull_request:
     branches: [main]
-    paths:
-      - "**"
+    paths-ignore:
+      - "helm/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

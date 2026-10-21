@@ -89,6 +89,18 @@ app:
   # Comma-separated URLs to POST JSON when the public IP changes (previous_ip, current_ip, updated_at)
   webhookUrls: ""
 
+# SealedSecret holding the EMAIL_* env vars for email notifications on IP change. A SealedSecret
+# is bound to the name and namespace it was sealed with, so seal it with this name in the release
+# namespace, then paste spec.encryptedData from kubeseal's output (see README).
+sealedSecret:
+  create: true
+  name: watcher-in-the-water-email
+  encryptedData:
+    EMAIL_HOST_NAME: AgA9VtvBh0r4qU3EBkvSVCZK2tqL3tunyKWDZOI8ePYARnb7CkL+tXc8rSNuHTHw+Ejc+MBLM4pV9o2BcwWRtr//0Fi6CL4j1X0nng1zdfj9JGSIjrebbFR6yyyuZN8ycPGMbFhxSQqYgDFepOKGD4wNJvc2nz5TuFlw23MhatwuSkDHD7jonRPIn6i60+pBCWs8enJQjGyOm8Vcs2HV+/x4kDkOyID7Mnx/7xUQIQlgK+8+ZZW4VCFPZZ/41Kdy/RCZoxWXcNR+lfW4wzif6PCxJEjwA9rGzyH6/3S73Ir/rpnHucgxOldMhbpXKQYEmAJ+IdlQCQScigVantD25H/JVDJhlUPxnd8Xi3/zJld10boNlqrEbEuMeA712nQm1FJ0frPHtwFA7W5QmsAhkPrukQx3PFS4ERAM/LwtY4uQpRAcRnYqtfzjwelbcdCOL9zsPAnzdgjvEFQcr9nlByP65GSkXm+YAZBXSOpuNmwgUEzgME4Sd0+xu1kHAVbhjvLDazZs4vNQAhV56PjP2Of5qwyUZcUpMu5DMtxon6WovDfvPIwkwzr7vK3R8VmBOKa3h1UJydDO0bhNAFURsJDIFvhLG2KonmazaiMgFkHtgYaeU4H2Gj4U3xfQrE65bcfTm1XKVplF4IinaASvTVA7azpKUrCaZ0SYHyQd8nVgq8wUAOlJUBtaBSlOZSfmTm6QszPiGswv7RSym7J218+U
+    EMAIL_PASSWORD: AgBMGR0uuk6m+YyeSeUu+dkWlIwQoqb8iCgdX6dFfiaY+yCVWbQOtGLrdl1Db6wAADQs3AWJtMQEHUa8otoSmo74/PxmZdia0Qtx4M1euo6sBsfL+kul9Eg5cxwJI2dGSnva8g5B5p2btiHWnXT+5Tey8MVUs9PD6AsqUzTCVtMYAB6mgnUg149ia/0axFgJkmywF64y7t4rtFiWQ3aPeKDL52reIwGD8AnPfb1w+mKDUlMeiVzkF/jezXoBoX6a7kAPIstQTcNWYiahztpmL1uHqzM/meOD0ncwWqY4B9FQYMObVE5uz+zx5VscqTrNsbYeqnNSOBV0d3OfDuQ7aZ0KKjTArusrmI7THiv13pSvQ9Fxh4cAPfJOYANjk7PhGQBCiSovLJk29hUFvoat7EpDGAkmg9PZ8DWziyQjM1hDVXTfveTfVbzVhVKRisFVtELTOkfGGG4VX7/apDcZl6q3spK+ANlPzzVQfC8PBAgRb22p8R11CgY74xustxMxQjxPNhNcQoRReM+gv1MybTdFGG8OSd8tGXIbxKUX7GlMxlBTdJL6oN0IdUzjyCMWuisRDLb4VDy6zj83fZSD2YNHf6tSCJTHOpyI8TILPdSlgMzEuN1W/PK4Cc7KSgIN1EmQV6jqCxI0wyg+dBuZ3/lW+br8fbP3XCUkGaY95BRjTbByVJ7gK09QHJfPqW+kxKYgjpfnMEmaV1nnziDsjK71z5iH
+    EMAIL_PERSONAL_EMAIL: AgCMPsbNSYK/uzWQTpssJrI2IldKAYdTbpJ6XE1PI6xRSAlYB1pALy0huwHecJpmTzJobw9aZXLch2N6HsVzdOZ34gJRHSq7xD+7KQYeeSYP7LPR/sEYj6zrqWn+4+ihBQDe4RUv/94Gsbj8UhG1h0qZ5CzEkiyG81gHvKrDkd+aqhzBMOufHSR9ozbdvZYm13rej6Ngq0gUg5qu79l+zsF0pnONfpG06+DQAl506Q8Vg2ISCUu7Uw58UTO2Hx5ARILgUuZnSIafI8OAdt/nHfTe9LaN+TMZUwc6Jc60bm/D51zXd8n0vxXWnJfU0q6vbO1K0dK9ynCcyVumXBSrozdkiHt2gRB32YUSYRSrwTHLzcLVC+z3X/O/PfhPkW9sFtkgjyNgUl7cFXMtr52oXDAYuRYs3UnQJnSWI0Lj1NRhF/9ZkvV7QxSnj0G9N9F6qIm5i1iYm8cG9STAijNm+VFV57FsnlHf5J+pvANL4Ot19u8cY0n9fTwFc3m9GnfJ7ruZVQvauykiKETk5sTKvZ9c5V1xv8ZyK6xSUZHjt+6ei3pTSnolYMf7iciW7en47KeJb3NCVWpJCiYjvLdIMhmKODOAR7n4NxNf4azUFJzLsTZklSMEbPaKM7bvWV04uC69JvZpMVfCPBa+IKwiso4Pu0ASR/bOzueiFQ/zOaA3VqaVkbBwPayIlE4PEIz30TSYdbiHyWlHxAGvgRQxsFU=
+    EMAIL_USERNAME: AgAvW6TGmra/TL8uuqcq8afZwiAYmN7xFNbfkrEI3kWM/GuB8sjz/lPtN4ThYKyg8H4gEhiStyUpumfoEVnk++SRynF9zGp6kiEqLPTwM4WG39wQWPsR05xQJKOSRN8uPMRVpdvk4KSkHB6sfLgiPszhOg5UshUlcNh9+L8TyhZqbKdwH1e9oaN9r2byf60pk83QqkqwKXXQTxyyUXF6NYyfnRS5tIetaLnmvIMwnecgYJ2vDJSXTYgcQX2MhJpfwHARbuUFHzdVA8hSSYimonr8voYKDsGgmMSgYOW3EmAc49PB1MB6TYqg3XqpEgwhB6kZfYg68LIsJW/ESyuYRHlcUB4CnWGBPfGO3jVFRLuZaQAIY0HWrmZSPXbBoPly79je4ctcnBqjFlAcavaQxART+u6romQq6Wzx2/+Zt+rbkw8HNnYi043IqqVwY1sFPCXBsYB20DDsvrxXpmZ585U8MIt6YaX+doSVtS1fKKtrxI27gmqobd7lOlaXWb9ZpZHrsF5eBFT3Ls4nIrsAlSVIRH/BjUJD0PtXuYcLrYxQjPcGubot373Hf0ABobXT4htd6LNz8+gNL53VCKqSTAsC44l/YVmJdyeFHv3MbZ2C795p7dcqD3GSrA1inwDwVb7xfOISkNxbHnr0XwCFTwcu1Yi1fo0DO996dx1ItT5hzu/cRaJcxh/kl6m6JIEvoMEQP2I8+oAnvfc79wBqFSrvAVs6
+
 persistence:
   enabled: true
   mountPath: /var/lib/watcher
@@ -111,12 +123,10 @@ persistence:
 #         key: url
 extraEnv: []
 
-# Load all keys from ConfigMap or Secret. Email notifications read EMAIL_HOST_NAME, EMAIL_PORT,
-# EMAIL_TLS, EMAIL_USERNAME, EMAIL_PASSWORD, and EMAIL_PERSONAL_EMAIL from the environment; supply
-# them from the Secret that a SealedSecret unseals into (see README):
+# Load all keys from ConfigMap or Secret
 # extraEnvFrom:
 #   - secretRef:
-#       name: watcher-in-the-water-email
+#       name: my-app-secrets
 #   - configMapRef:
 #       name: my-app-config
 extraEnvFrom: []

@@ -51,19 +51,26 @@ Delivery is best-effort like webhooks: failures are logged and not retried.
 
 ### Kubernetes with Sealed Secrets
 
-Put the six `EMAIL_*` values in a local `KEY=value` file that you do not commit (e.g. `email.env`), then seal it for the namespace you deploy to:
+The chart can deploy the `EMAIL_*` values as a SealedSecret and load them into the pod. Write a Secret named `watcher-in-the-water-email` in the namespace you deploy to, using `stringData` for plain-text values (or base64-encoded values under `data`), then seal it. Pass `--controller-name` / `--controller-namespace` if your controller isn't `sealed-secrets-controller` in `kube-system`:
 
 ```bash
-kubectl create secret generic watcher-in-the-water-email --namespace <namespace> --from-env-file=email.env --dry-run=client -o yaml | kubeseal --format yaml > watcher-in-the-water-email.sealed.yaml
+kubeseal --format yaml < watcher-in-the-water-email.yaml > watcher-in-the-water-email.sealed.yaml
 ```
 
-Apply the SealedSecret, then point the chart at the Secret it unseals into:
+Copy `spec.encryptedData` from the output into `helm/values.yaml` and turn it on:
 
 ```yaml
-extraEnvFrom:
-  - secretRef:
-      name: watcher-in-the-water-email
+sealedSecret:
+  create: true
+  name: watcher-in-the-water-email
+  encryptedData:
+    EMAIL_HOST_NAME: AgA...
+    EMAIL_PASSWORD: AgB...
+    EMAIL_PERSONAL_EMAIL: AgC...
+    EMAIL_USERNAME: AgA...
 ```
+
+The encrypted values are safe to commit; only the cluster's controller can decrypt them. Pods restart automatically when `encryptedData` changes. Delete the plain-text Secret file once sealed.
 
 ## Testing
 

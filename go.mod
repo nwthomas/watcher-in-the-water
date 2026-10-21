@@ -1,6 +1,6 @@
 module github.com/nwthomas/watcher-in-the-water
 
-go 1.26
+go 1.27.3
 
 require go.uber.org/automaxprocs v1.6.0
 

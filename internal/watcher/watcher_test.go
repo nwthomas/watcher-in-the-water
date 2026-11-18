@@ -146,9 +146,8 @@ func TestPollOnce_emailsOnlyOnChange(t *testing.T) {
 		wantConnect bool
 	}{
 		{name: "seed does not email", storedIP: "", fetchedIP: "192.0.2.1", wantConnect: false},
-		// TEMP TEST: inverted to match the temporary watcher behavior. Revert after testing.
-		{name: "unchanged emails", storedIP: "192.0.2.1", fetchedIP: "192.0.2.1", wantConnect: true},
-		{name: "change does not email", storedIP: "192.0.2.1", fetchedIP: "192.0.2.2", wantConnect: false},
+		{name: "unchanged does not email", storedIP: "192.0.2.1", fetchedIP: "192.0.2.1", wantConnect: false},
+		{name: "change emails", storedIP: "192.0.2.1", fetchedIP: "192.0.2.2", wantConnect: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

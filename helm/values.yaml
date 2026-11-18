@@ -83,7 +83,7 @@ app:
   port: 8080
   logFormat: json
   logLevel: info
-  checkInterval: 30s
+  checkInterval: 30m
   statePath: /var/lib/watcher/state.json
   ipUrls: ""
   # Comma-separated URLs to POST JSON when the public IP changes (previous_ip, current_ip, updated_at)

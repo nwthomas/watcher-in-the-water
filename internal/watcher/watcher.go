@@ -81,6 +81,8 @@ func pollOnce(ctx context.Context, client *http.Client, urls []string, statePath
 	}
 	if previous.PublicIP == ip {
 		slog.Info("public ip verified", "public_ip", ip, "changed", false)
+		// TEMP TEST: email on unchanged IP instead of on change. Revert after testing.
+		email.NotifyIPChange(ctx, emailCfg, previous.PublicIP, ip, time.Now().UTC())
 		return
 	}
 
@@ -95,5 +97,5 @@ func pollOnce(ctx context.Context, client *http.Client, urls []string, statePath
 		"current_ip", ip,
 	)
 	webhook.NotifyIPChange(ctx, client, webhookURLs, previous.PublicIP, ip, next.UpdatedAt)
-	email.NotifyIPChange(ctx, emailCfg, previous.PublicIP, ip, next.UpdatedAt)
+	// TEMP TEST: email disabled on change while testing inverted behavior. Revert after testing.
 }

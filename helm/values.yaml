@@ -107,30 +107,9 @@ persistence:
   size: 10Mi
   storageClassName: longhorn
 
-# Extra env vars: plain values, or from ConfigMap/Secret via valueFrom
-# extraEnv:
-#   - name: LOG_LEVEL
-#     value: "debug"
-#   - name: API_KEY
-#     valueFrom:
-#       secretKeyRef:
-#         name: my-secret
-#         key: SECRET_NAME_HERE
-#   - name: EXTERNAL_URL
-#     valueFrom:
-#       configMapKeyRef:
-#         name: my-config
-#         key: url
 extraEnv: []
 
-# Load all keys from ConfigMap or Secret
-# extraEnvFrom:
-#   - secretRef:
-#       name: my-app-secrets
-#   - configMapRef:
-#       name: my-app-config
 extraEnvFrom: []
 
-# Set true only if you add data to templates/secret.yaml (or use external secret tooling)
 secret:
   create: false

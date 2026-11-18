@@ -4,7 +4,7 @@
 
 This repository contains a Go server that monitors IP address assignment changes from your internet service provider (ISP) via dynamic host configuration protocol (DHCP).
 
-You can then have it make callbacks via webhooks to any URLs that you want which will include the new IP address in the request body, and optionally send you an email (for example through iCloud Mail).
+You can have it make callbacks via webhooks to any URLs that you want which will include the new IP address in the request body, and optionally send you an email (for example through iCloud Mail).
 
 ## Project Structure
 
